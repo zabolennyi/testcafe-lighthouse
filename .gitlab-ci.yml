@@ -1,0 +1,43 @@
+variables:
+  npm_config_cache: '$CI_PROJECT_DIR/.npm'
+  DEV_ENV: 'https://google.com'
+
+stages:
+  - run-tests
+  - publish
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .npm
+
+run_dev:
+  variables:
+    ENV_HOME: $DEV_ENV
+  image: cypress/browsers:node12.18.3-chrome89-ff86
+  stage: run-tests
+  artifacts:
+    paths:
+      - report/
+    when: always
+  allow_failure: true
+  tags:
+    - docker
+  script:
+    - npm install
+    - npm ci
+    - npm run test
+  only:
+    - test
+  when: manual
+
+upload-to-s3:
+  stage: publish
+  when: manual
+  image: garland/aws-cli-docker
+  script:
+    - scripts/publish-results.sh
+  only:
+    - test
+  tags:
+    - docker

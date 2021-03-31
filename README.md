@@ -1,1 +1,5 @@
-# testcafe-lighthouse
+## Project setup
+
+```
+npm i
+```
